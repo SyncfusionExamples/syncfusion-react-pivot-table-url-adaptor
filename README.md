@@ -80,12 +80,12 @@ This application provides a clean starting point for integrating the Syncfusion 
 ### Frontend
 | Technology | Version | Purpose |
 |-----------|---------|---------|
-| React | ^19.2.4 | UI framework |
-| React DOM | ^19.2.4 | React rendering engine |
-| React Scripts | 5.0.1 | Build tooling and dev server |
-| @syncfusion/ej2-react-pivotview | latest | Pivot Table component |
-| @syncfusion/ej2-data | latest | DataManager and UrlAdaptor |
-| Testing Library | ^16.3.2 | Unit and component testing |
+| React | ^19.2.7 | UI framework |
+| React DOM | ^19.2.7 | React rendering engine |
+| Vite | ^8.1.1 | Build tooling and dev server |
+| TypeScript | ~6.0.2 | Static typing for the client |
+| @syncfusion/ej2-react-pivotview | ^34.1.31 | Pivot Table component |
+| @syncfusion/ej2-tailwind3-theme | ^34.1.30 | Tailwind 3 theme for Syncfusion components |
 
 ### Backend
 | Technology | Version | Purpose |
@@ -228,18 +228,18 @@ Open a second terminal and run:
 
 ```bash
 cd Client
-npm start
+npm run dev
 ```
 
-The React application will start on:
+The React application (Vite dev server) will start on:
 
-- `http://localhost:3000`
+- `http://localhost:5173`
 
 ### 3. Verify the sample
 
 Once both applications are running:
 
-1. Open `http://localhost:3000` in your browser.
+1. Open `http://localhost:5173` in your browser.
 2. The Pivot Table loads data from the backend through the UrlAdaptor.
 3. Use the drill-through editor to **add**, **edit**, or **delete** records.
 4. The Pivot Table refreshes automatically after each operation.
@@ -251,7 +251,7 @@ cd Client
 npm run build
 ```
 
-This produces an optimized production build in `Client/build/`.
+This produces an optimized production build in `Client/dist/`.
 
 ---
 
@@ -268,15 +268,15 @@ The backend exposes the following endpoints in `OrdersController`:
 | POST   | `/api/Orders/Remove`     | Removes an order record (matched by `OrderID`) |
 | POST   | `/api/Orders/CrudUpdate` | Single endpoint that dispatches to insert/update/remove based on the `action` field |
 
-If you change the backend port, update the URLs in `Client/src/App.js` so the frontend points to the correct API address:
+If you change the backend port, update the URLs in `Client/src/App.tsx` so the frontend points to the correct API address:
 
-```javascript
-const data = new DataManager({
+```typescript
+const data: DataManager = new DataManager({
     url: 'http://localhost:<port>/api/Orders',
     insertUrl: 'http://localhost:<port>/api/Orders/Insert',
     updateUrl: 'http://localhost:<port>/api/Orders/Update',
     removeUrl: 'http://localhost:<port>/api/Orders/Remove',
-    adaptor: new UrlAdaptor()
+    adaptor: new UrlAdaptor()                // Specify UrlAdaptor for custom REST API.
 });
 ```
 
@@ -289,24 +289,24 @@ const data = new DataManager({
 ```text
 url-adaptor-with-pivot-table/
 ├── README.md                              # This file
-├── PostgreReadMe.md                       # PostgreSQL variant reference
 ├── url-adaptor.md                         # Detailed UrlAdaptor reference
 │
-├── Client/                                # React Frontend
+├── Client/                                # React Frontend (Vite + TypeScript)
+│   ├── index.html                         # HTML entry point
 │   ├── package.json                       # npm dependencies & scripts
+│   ├── tsconfig.json                      # TypeScript configuration (root)
+│   ├── tsconfig.app.json                  # TypeScript configuration (app)
+│   ├── tsconfig.node.json                  # TypeScript configuration (node/vite)
+│   ├── vite.config.ts                     # Vite configuration
 │   ├── public/
-│   │   ├── index.html                     # HTML entry point
-│   │   ├── manifest.json                  # PWA manifest
-│   │   └── robots.txt
+│   │   ├── favicon.svg
+│   │   └── icons.svg
 │   └── src/
-│       ├── App.js                         # Main component (PivotView + DataManager)
+│       ├── App.tsx                        # Main component (PivotView + DataManager)
 │       ├── App.css                        # Component styles
-│       ├── App.test.js                    # Component tests
-│       ├── datasource.js                  # Local data source (not used by UrlAdaptor)
-│       ├── index.js                       # React root
+│       ├── main.tsx                       # React root (entry point)
 │       ├── index.css                      # Global styles
-│       ├── reportWebVitals.js
-│       └── setupTests.js
+│       └── assets/
 │
 └── UrlAdaptor/                            # ASP.NET Core Backend
     ├── Program.cs                         # App startup, JSON & CORS configuration
@@ -331,9 +331,11 @@ url-adaptor-with-pivot-table/
 
 | File | Purpose |
 |------|---------|
-| `Client/src/App.js` | Main React component — PivotView configuration, DataManager setup, edit settings, and `beginDrillThrough` event |
-| `Client/src/index.js` | React application entry point and DOM mounting |
+| `Client/src/App.tsx` | Main React component — PivotView configuration, DataManager setup, edit settings, and `beginDrillThrough` event |
+| `Client/src/main.tsx` | React application entry point and DOM mounting |
 | `Client/src/App.css` | Component-level styles |
+| `Client/vite.config.ts` | Vite build/dev server configuration |
+| `Client/tsconfig.json` | TypeScript compiler configuration |
 | `Client/package.json` | Frontend dependencies and npm scripts |
 
 #### Backend Key Files
@@ -354,7 +356,7 @@ url-adaptor-with-pivot-table/
 ### Pivot Table does not load data
 
 - ✅ Verify the backend is running: `dotnet run` in the `UrlAdaptor` folder
-- ✅ Confirm the URL in `Client/src/App.js` matches the backend port shown in the console
+- ✅ Confirm the URL in `Client/src/App.tsx` matches the backend port shown in the console
 - ✅ Check the browser **Developer Tools → Network** tab for failed requests
 - ✅ Verify the response uses the `{ result, count }` shape and uses the original property casing (`OrderID`, not `orderId`)
 
@@ -362,7 +364,7 @@ url-adaptor-with-pivot-table/
 
 ```
 Access to XMLHttpRequest at 'http://localhost:5193/api/Orders' from origin 
-'http://localhost:3000' has been blocked by CORS policy.
+'http://localhost:5173' has been blocked by CORS policy.
 ```
 
 - ✅ Ensure CORS is enabled in `UrlAdaptor/Program.cs`
@@ -372,13 +374,13 @@ Access to XMLHttpRequest at 'http://localhost:5193/api/Orders' from origin
 ### Port already in use
 
 - ✅ Change the port in `UrlAdaptor/Properties/launchSettings.json`
-- ✅ Update the matching URL in `Client/src/App.js`
+- ✅ Update the matching URL in `Client/src/App.tsx`
 - ✅ On Windows, find the process with `netstat -ano | findstr :5193` and kill it with `taskkill /PID <PID> /F`
 
 ### CRUD operations not saving
 
 - ✅ Confirm the primary key (`OrderID`) is correctly set in the `beginDrillThrough` event
-- ✅ Check that the `insertUrl`, `updateUrl`, and `removeUrl` values in `App.js` match the backend routes exactly
+- ✅ Check that the `insertUrl`, `updateUrl`, and `removeUrl` values in `App.tsx` match the backend routes exactly
 - ✅ Verify the request body contains the expected `CRUDModel<T>` shape (`action`, `keyColumn`, `key`, `value`, `@params`)
 
 ### Empty Pivot Table layout
