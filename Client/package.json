@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@syncfusion/ej2-react-pivotview": "^34.1.31",
-    "@syncfusion/ej2-tailwind3-theme": "^34.1.30",
+    "@syncfusion/ej2-react-pivotview": "*",
+    "@syncfusion/ej2-tailwind3-theme": "*",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
